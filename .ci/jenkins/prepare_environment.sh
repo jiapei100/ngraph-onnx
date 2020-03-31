@@ -60,18 +60,18 @@ function build_ngraph() {
 function build_dldt() {
     set -x
     local directory="$1"
-    CMAKE_ARGS="-DNGRAPH_CPU_ENABLE=TRUE -DNGRAPH_LIBRARY_OUTPUT_DIRECTORY=${directory}/dldt_dist \
+    CMAKE_ARGS="-DNGRAPH_LIBRARY_OUTPUT_DIRECTORY=${directory}/dldt_dist \
                 -DNGRAPH_COMPONENT_PREFIX=deployment_tools/ngraph/ -DNGRAPH_USE_PREBUILT_LLVM=TRUE \
                 -DNGRAPH_TOOLS_ENABLE=TRUE -DNGRAPH_WARNINGS_AS_ERRORS=TRUE -DNGRAPH_UNIT_TEST_ENABLE=FALSE \
                 -DCMAKE_BUILD_TYPE=Release -DENABLE_PYTHON=OFF -DENABLE_RPATH=ON -DCMAKE_EXPORT_COMPILE_COMMANDS=ON \
-                -DENABLE_PERFORMANCE_TESTS=ON -DENABLE_TESTS=ON -DNGRAPH_INTERPRETER_ENABLE=ON -DNGRAPH_DEBUG_ENABLE=OFF \
+                -DENABLE_PERFORMANCE_TESTS=ON -DENABLE_TESTS=ON -DNGRAPH_DEBUG_ENABLE=OFF \
                 -DENABLE_SAMPLES=OFF -DENABLE_FUNCTIONAL_TESTS=ON -DENABLE_MODELS=OFF -DENABLE_PRIVATE_MODELS=OFF \
                 -DENABLE_GNA=OFF -DENABLE_VPU=OFF -DENABLE_SANITIZER=OFF -DENABLE_MYRIAD=OFF -DENABLE_MKL_DNN=ON \
                 -DENABLE_CLDNN=OFF -DENABLE_VALIDATION_SET=OFF -DPYTHON_EXECUTABLE=`which python` \
                 -DNGRAPH_ONNX_IMPORT_ENABLE=ON -DNGRAPH_UNIT_TEST_OPENVINO_ENABLE=TRUE -DNGRAPH_IE_ENABLE=ON \
                 -DCMAKE_INSTALL_PREFIX=${directory}/dldt_dist -DNGRAPH_DYNAMIC_COMPONENTS_ENABLE=ON"
     cd "${directory}/dldt/ngraph"
-    git checkout rblaczkowski/updated-ie-enabled
+    git checkout rblaczko/onnx-dldt-backend-updated
 
     cd "${directory}/dldt"
     
@@ -91,8 +91,9 @@ function build_dldt() {
 
     rm -f "${directory}/dldt/ngraph/python/dist/ngraph*.whl"
     rm -rf "${directory}/dldt/ngraph/python/*.so ${directory}/dldt/ngraph/python/build"
+    mv "${directory}/dldt_dist/deployment_tools/inference_engine/lib/intel64/*.so ${directory}/dldt_dist/deployment_tools/ngraph/lib"
     export PYBIND_HEADERS_PATH="${directory}/dldt/ngraph/python/pybind11"
-    export NGRAPH_CPP_BUILD_PATH="${directory}/deployment_tools/ngraph/"
+    export NGRAPH_CPP_BUILD_PATH="${directory}/dldt_dist/deployment_tools/ngraph"
     export NGRAPH_ONNX_IMPORT_ENABLE="TRUE"
     python3 setup.py bdist_wheel || return 1
     return 0
